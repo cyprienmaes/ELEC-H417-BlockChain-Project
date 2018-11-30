@@ -55,29 +55,28 @@ def sendMessage(message):
     s.send(message)
     s.close()
 
+def main():
 
-sendMessage(MESSAGE)
+    node = 
+    sendMessage(MESSAGE)
 
-#userAnswer = input('Send request? ')
+    active = True
 
-
-
-active = True
-
-while active:
-    userAnswer = input("Write 'a' to athenticate or 'l' to logout")
-    if userAnswer == 'a':
-        authenticate()
-        #print(authenticate())
-    elif userAnswer == 'l':
-        active = False
-    else:
-        print('Wrong command')
-        pass
+    while active:
+        userAnswer = input("Write 'a' to athenticate or 'l' to logout")
+        if userAnswer == 'a':
+            authenticate()
+        elif userAnswer == 'l':
+            active = False
+        else:
+            print('Wrong command')
+            pass
     
     
+if __name__ == '__main__': main()
 
 #print ("received data:", data)
+
 
 
     
