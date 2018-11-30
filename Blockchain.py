@@ -35,12 +35,13 @@ class Blockchain(object):
 		
 	def new_block(self, previous_hash):
 		"""
-		Create a new Block in the Blockchain which takes in parameter
-		PREVIOUS_HASH : Hash of the previous Block
-		And return
-		BLOCK : The new Block
+		Create a new Block in the Blockchain. This block must follow the
+		previous-hash of the chain.
+		PARAMETERS :
+		- previous_hash : Hash of the previous block
+		RETURN :
+		Block : The new Block
 		"""
-
 		block = {
 			'index': len(self.chain),
 			'timestamp': strftime("%a, %d %b %Y %H:%M:%S", gmtime()),
@@ -62,24 +63,51 @@ class Blockchain(object):
 	
 	def new_transaction(self, amount):
 		"""
-		New transaction to go inside a new block which takes in parameter
-		- AMOUNT : The new amount that the block provide
-		And return :
-		- INDEX : The index of the Block that will hold this transaction
+		There are several transactions inside a block. The user can create 
+		a transaction if he put an amount inside the list of transactions.
+		PARAMETERS :
+		- Amount : The new amount that the list of transaction takes
+		RETURN :
+		- Index : The index of the Block that will hold this transaction
 		"""
 		self.transactions.append({'data': amount})
 		return self.last_block['index'] + 1
 	 
 	def valid_block(self, block) :
 		"""
-		Determine if a given block is valid. This function takes in parameter :
-		- BLOCK : the block that we want to make sure it's valid
-		And return boolean expression
+		Determine if a given block is valid with the previous-hash and the 
+		hash of the last block inside the chain.
+		PARAMETERS :
+		- Block : the block that we want to make sure it's valid
+		RETURN :
+		- Boolean Expression
 		"""
 		if block['previous_hash'] != self.last_block['hash'] :
 			return False
 		else :
 			return True
+	
+	def update_chain(self, neighbourChain) :
+		"""
+		Update the block chain if an other chain is longer than the blockchain
+		of this node. 
+		PARAMETERS :
+		- Chain : The chain which is compare with the local chain
+		RETURN :
+		- Boolean Expression
+		"""
+		chainLength = len(self.chain)
+		neighbourChainLength = len(neighbourChain.chain)
+		print(chainLength)
+		print(neighbourChainLength)
+		if neighbourChainLength > chainLength :
+			self.chain = neighbourChain.chain
+			print("The chain is updated")
+			return True
+		else :
+			print("The chain is the longer one")
+			return False
+			
 	
 		 
 	
@@ -87,10 +115,11 @@ class Blockchain(object):
 	# The static method doesn't need an object instantiation.
 	def hash(block):
 		"""
-		Creates a SHA-256 hash of a Block which takes in parameter
-		Block: A block of the blockchain
-		And return
-		HASH : the hash in 256 bits
+		Creates a SHA-256 hash of a Block.
+		PARAMETERS :
+		-Block: A block of the blockchain
+		RETURN :
+		Hash : the hash in 256 bits
 		"""
 		# We must make sure that the Dictionary is Ordered, or we'll have inconsistent hashes
 		block_string = json.dumps(block, sort_keys=True).encode()
@@ -106,8 +135,25 @@ class Blockchain(object):
 		"""
 		return self.chain[-1]
 
-newBlockChain = Blockchain()
-newBlockChain.new_transaction(24) 
-newBlockChain.new_transaction(67) 
-prevBlock = newBlockChain.last_block
-newBlockChain.new_block(prevBlock['hash'])
+BlockChain1 = Blockchain()
+BlockChain1.new_transaction(24) 
+prevBlock = BlockChain1.last_block
+BlockChain1.new_block(prevBlock['hash'])
+BlockChain1.new_transaction(-67)
+prevBlock = BlockChain1.last_block
+BlockChain1.new_block(prevBlock['hash'])
+BlockChain2 = Blockchain()
+BlockChain2.new_transaction(24) 
+prevBlock = BlockChain2.last_block
+BlockChain2.new_block(prevBlock['hash'])
+BlockChain2.new_transaction(-67)
+BlockChain2.new_transaction(38)
+prevBlock = BlockChain2.last_block
+BlockChain2.new_block(prevBlock['hash'])
+BlockChain2.new_transaction(98)
+prevBlock = BlockChain2.last_block
+BlockChain2.new_block(prevBlock['hash'])
+
+BlockChain1.update_chain(BlockChain2)
+BlockChain2.update_chain(BlockChain1)
+
