@@ -4,6 +4,11 @@ import socket
 import hashlib
 import ast
 
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
+
 class Node:
 
     #--------GLOBAL VARIABLES----------------
@@ -13,14 +18,12 @@ class Node:
     BUFFER_SIZE = 1024
     #MESSAGE = b"Hello, World!"
     Password = b'Dricot'
-    MESSAGE = str({'Username':'mat','Password':Password}).encode('utf-8')
+    
     data = ''
-
-
 
     #-------------METHODS-------------------
 
-     def __init__(self):
+    def __init__(self):
         config=ConfigParser()
         config.read('settings.ini')
         self.ip_address=config.get('node','ip_address')
@@ -31,7 +34,7 @@ class Node:
         
     def description(self):
         return '{} IP is {} and it is connected to the server at {}. Its neighbours are {} and {}' . format(self.username,self.ip_address,self.server_address,self.nextIP1,self.nextIP2)        
-    pass
+    #pass
     
 
     def connect(message):
@@ -42,19 +45,19 @@ class Node:
         print ("received data:", data)
         s.close()
 
-    def authenticate():
+    def authenticate(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((TCP_IP, TCP_PORT))
-        message = request = str({'Username':'mat','Request': 'send nonce motherfucker'}).encode('utf-8')
+        s.connect((self.server_address, self.TCP_PORT))
+        message = str({'Username':self.username,'Request': 'send nonce motherfucker'}).encode('utf-8')
         s.send(message)
-        data = s.recv(BUFFER_SIZE)
+        data = s.recv(self.BUFFER_SIZE)
         #print ("received data:", data)
         hashedMessage = hashlib.sha256()
         hashedMessage.update(data)
-        hashedMessage.update(Password)
+        hashedMessage.update(self.Password)
         myHash = hashedMessage.digest()  #or hexdigest for a more condensed form
         s.send(myHash)
-        data = s.recv(BUFFER_SIZE)
+        data = s.recv(self.BUFFER_SIZE)
         print ("received authentication:", data)
         s.close()
         return data
@@ -62,19 +65,21 @@ class Node:
 
     def requestNonce():
         #request = b"('mat','send nonce motherfucker')"
-        request = str({'Username':'mat','Request': 'send nonce motherfucker'}).encode('utf-8')
+        request = str({'Username':self.username,'Request': 'send nonce motherfucker'}).encode('utf-8')
         connect(request)
 
-    def sendMessage(message):
+    def sendMessage(self, message):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((TCP_IP, TCP_PORT))
+        print(self.server_address, self.TCP_PORT)
+        s.connect((self.server_address, self.TCP_PORT))
         s.send(message)
         s.close()
 
 
 def main():
 
-    node = node()
+    node = Node()   
+    MESSAGE = str({'Username':node.username,'Password':node.Password}).encode('utf-8')
     node.sendMessage(MESSAGE)
 
     active = True
