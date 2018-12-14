@@ -39,7 +39,7 @@ def checkUser(user):
     return userInDataBase
 
 
-#y = input("To stop connection press y.")
+
 while 1:
     s.listen(1)
     conn, addr = s.accept()
