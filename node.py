@@ -5,7 +5,8 @@ import hashlib
 import ast
 from threading import Thread
 import time
-import Blockchain
+#import Blockchain
+from Blockchain import Blockchain
 
 
 try:
@@ -18,12 +19,13 @@ class Node:
     #--------GLOBAL VARIABLES----------------
 
     #TCP_IP = '127.0.0.1'  # my IP 164.15.244.54
-    TCP_PORT = 5005
-    TCP_PORT_BROAD = 5004
-    BUFFER_SIZE = 1024
+    TCP_PORT = 5005        # port number used for the TCP authentication center connection
+    TCP_PORT_BROAD = 5004  # testing for broadcoast 
+    BUFFER_SIZE = 1024     # size of the receiveng buffer -- we can adapt it to the lenght
+                           # of our messages witch will speed up the transition
     #MESSAGE = b"Hello, World!"
-    Password = b'Dricot'
-    sec = 0
+    Password = b'Dricot'   # users password
+    sec = 0                # counter but I think it's gonna be useless
     data = ''
 
     #-------------METHODS-------------------
@@ -41,6 +43,7 @@ class Node:
     #Timer compare
     #Timer send
 
+    # runTimer is a thread which runs the timer and sand it over a upd socket
     def runTimer(self):
         while self.sec <= 60:
             print(self.sec)
@@ -57,28 +60,67 @@ class Node:
         timerSocket.sendto(str({'time':self.sec}).encode('utf-8'), (self.nextIP1, 5004))
         timerSocket.close()
 
+    def runlistenToNodes(self):
+        """
+        This function runs as a thread. It is responsible for listening to the neighboring nodes
+        """
         
-    def runNodesListener():
+        neighbour1socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        neighbour1socket.connect((self.nextIP1, 5003))
+        
+    def runNodesListener(self):
+        """
+        This function runs as a thread. It is responsible for listening to the neighboring nodes
+        """
+        
         socketNodes = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socketNodes.bind((TCP_IP, TCP_PORT))
+        socketNodes.bind((self.ip_address, 5003))
         while True:
             socketNodes.listen(1)
-            conn, addr = s.accept()
-            data = conn.recv(BUFFER_SIZE)
-            
-        
-    def runAuthenticationCenterCom(self):
+            #print("fuck you")
+            conn, addr = socketNodes.accept()
+            data = conn.recv(self.BUFFER_SIZE)
+            if data:
+                print(data)
+            else: pass
 
+    def runSend
+            
+
+    
+    def runAuthenticationCenterCom(self):
+        """ fonction run as a thread it's reposible for the communication with
+        the authentication center
+        """
+        
         while True:
-            userAnswer = input("Write 'a' to athenticate or 'l' to logout")
-            if userAnswer == 'a':
-                self.authenticate()
-            elif userAnswer == 'l':
-                #active = False
+            #userAnswer = input("Write 't' for transaction or 'l' to logout")
+            #usersAction(userAnswer)
+            answer = input("Write 't' for transaction or 'l' to logout")
+            if answer == 't':
+                authen = self.authenticate()
+                if authen == b'ok':
+                    blockchain = Blockchain()
+                    value = input("Write the value of the transaction: ")
+                    blockchain.new_transaction(value)
+            elif answer == 'l':
                 break
             else:
                 print('Wrong command')
                 pass
+
+    def usersAction(answer):
+        if answer == 't':
+            authen = self.authenticate()
+            if authen == b'ok':
+                blockchain = Blockchain()
+                value = input("Write the value of the transaction: ")
+                blockchain.new_transaction(value)
+##        elif answer == 'l':
+##            
+##        else:
+##            print('Wrong command')
+##            pass
 
     def connect(message):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -129,18 +171,21 @@ class Node:
         self.nextIP1=config.get('neigbours','IP_1')
         self.nextIP2=config.get('neigbours','IP_2')
 
-        authenticationCenterCom = Thread(target = self.runAuthenticationCenterCom)
-        timer = Thread(target = self.runTimer)
-        authenticationCenterCom.setDaemon(True)
-        timer.setDaemon(True)
-        authenticationCenterCom.start()
-        timer.start()
+        #authenticationCenterCom = Thread(target = self.runAuthenticationCenterCom)
+        nodeListener = Thread(target = self.runNodesListener())
+        #timer = Thread(target = self.runTimer)
+        #authenticationCenterCom.setDaemon(True)
+        nodeListener.setDaemon(True)
+        #timer.setDaemon(True)
+        #authenticationCenterCom.start()
+        nodeListener.start()
+        #timer.start()
 
 def main():
 
     node = Node()   
-    MESSAGE = str({'Username':node.username,'Password':node.Password}).encode('utf-8')
-    node.sendMessage(MESSAGE)
+    #MESSAGE = str({'Username':node.username,'Password':node.Password}).encode('utf-8')
+    #node.sendMessage(MESSAGE)
 
 ##    authenticationCenterCom = Thread(target = node.runAuthenticationCenterCom())
 ##    authenticationCenterCom.setDaemon(True)

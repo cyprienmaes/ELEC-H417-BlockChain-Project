@@ -60,7 +60,7 @@ class Blockchain(object):
 			print("The block " + str(block['index']) + " with an amount of " + str(block['transaction']) + "is not valid")
 		return block
 	
-	def new_transaction(self, amount):
+	def new_transaction(self,amount):
 		"""
 		New transaction to go inside a new block which takes in parameter
 		- AMOUNT : The new amount that the block provide
@@ -106,8 +106,8 @@ class Blockchain(object):
 		"""
 		return self.chain[-1]
 
-newBlockChain = Blockchain()
-newBlockChain.new_transaction(24) 
-newBlockChain.new_transaction(67) 
-prevBlock = newBlockChain.last_block
-newBlockChain.new_block(prevBlock['hash'])
+#newBlockChain = Blockchain()
+#newBlockChain.new_transaction(24) 
+#newBlockChain.new_transaction(67) 
+#prevBlock = newBlockChain.last_block
+#newBlockChain.new_block(prevBlock['hash'])
