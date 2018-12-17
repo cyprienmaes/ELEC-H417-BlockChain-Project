@@ -44,15 +44,24 @@ class Node:
         """
         
         socketNodes = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socketNodes.bind((self.ip_address, 5003))
+        socketNodes.bind((self.ip_address, 5002))
+
         while True:
             socketNodes.listen(1)
             #print("fuck you")
-            conn, addr = socketNodes.accept()
-            data = conn.recv(self.BUFFER_SIZE)
-            if data:
-                print(data)
-            else: pass
+            socketNodes.settimeout(1)
+            try :
+                conn, addr = socketNodes.accept()
+                print(addr)
+                data = conn.recv(self.BUFFER_SIZE)
+                if data:
+                    print(data)
+                else:
+                    continue
+            except socket.timeout:
+                pass
+
+            #print("fuck you")
 
 
     def runNodesMessage(self):
@@ -138,6 +147,10 @@ class Node:
 
 
     def __init__(self):
+        """
+        Constructor of the node
+        """
+        
         config=ConfigParser()
         config.read('settings.ini')
         self.ip_address=config.get('node','ip_address')
@@ -151,10 +164,11 @@ class Node:
             self.nextIP.append(neighbour[1])
             i+=1
 
+        self.blockchain = Blockchain()
+
         #authenticationCenterCom = Thread(target = self.runAuthenticationCenterCom)
         
-        nodeListener = Thread(target = self.runNodesListener)
-        print('ok')
+        nodeListener = Thread(target = self.runNodesListener)        
         nodesMessage = Thread(target = self.runNodesMessage)
         #timer = Thread(target = self.runTimer)
         #authenticationCenterCom.setDaemon(True)
@@ -166,6 +180,7 @@ class Node:
         
         nodeListener.start()
         nodesMessage.start()
+        #print('ok')
         #timer.start()
 
 def main():
