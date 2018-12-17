@@ -36,37 +36,7 @@ class Node:
         
     def description(self):
         return '{} IP is {} and it is connected to the server at {}. Its neighbours are {} and {}' . format(self.username,self.ip_address,self.server_address,self.nextIP1,self.nextIP2)        
-    #pass
-
-    #Timer
-    #Timer listener
-    #Timer compare
-    #Timer send
-
-    # runTimer is a thread which runs the timer and sand it over a upd socket
-    def runTimer(self):
-        while self.sec <= 60:
-            print(self.sec)
-            self.sendTimer()
-            time.sleep(1)
-            self.sec+=1
-            if self.sec >60:
-                self.sec = 0
-
-    def sendTimer(self):
-        timerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        #timerSocket.bind((self.nextIP1, self.TCP_PORT_BROAD))
-        #timerSocket.send(str({'time':self.sec}).encode('utf-8'))
-        timerSocket.sendto(str({'time':self.sec}).encode('utf-8'), (self.nextIP1, 5004))
-        timerSocket.close()
-
-    def runlistenToNodes(self):
-        """
-        This function runs as a thread. It is responsible for listening to the neighboring nodes
-        """
         
-        neighbour1socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        neighbour1socket.connect((self.nextIP1, 5003))
         
     def runNodesListener(self):
         """
@@ -84,8 +54,21 @@ class Node:
                 print(data)
             else: pass
 
-    def runSend
-            
+
+    def runNodesMessage(self):
+        """
+        Function sending infomrmations to other nodes
+        """
+        while True:
+            for neighbour in self.nextIP:
+                socketNodes = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                try:
+                    socketNodes.connect((neighbour, 5003))
+                    socketNodes.send(b'message')
+                    socketNodes.close()
+                except ConnectionRefusedError:
+                    pass
+                
 
     
     def runAuthenticationCenterCom(self):
@@ -94,8 +77,6 @@ class Node:
         """
         
         while True:
-            #userAnswer = input("Write 't' for transaction or 'l' to logout")
-            #usersAction(userAnswer)
             answer = input("Write 't' for transaction or 'l' to logout")
             if answer == 't':
                 authen = self.authenticate()
@@ -122,36 +103,30 @@ class Node:
 ##            print('Wrong command')
 ##            pass
 
-    def connect(message):
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((TCP_IP, TCP_PORT))
-        s.send(message)
-        data = s.recv(BUFFER_SIZE)
-        print ("received data:", data)
-        s.close()
 
     def authenticate(self):
+        """
+        Fonction which authenticates the user at the authentication center
+        """
+
+        
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((self.server_address, self.TCP_PORT))
-        message = str({'Username':self.username,'Request': 'send nonce motherfucker'}).encode('utf-8')
+        message = str({'Username':self.username,'Request': 'send nonce motherfucker'}).encode('utf-8') # User's request of nonce
         s.send(message)
         data = s.recv(self.BUFFER_SIZE)
-        #print ("received data:", data)
         hashedMessage = hashlib.sha256()
         hashedMessage.update(data)
-        hashedMessage.update(self.Password)
+        hashedMessage.update(self.Password)  # The received nonce and the password are concatenated and hashed
         myHash = hashedMessage.digest()  #or hexdigest for a more condensed form
         s.send(myHash)
         data = s.recv(self.BUFFER_SIZE)
-        print ("received authentication:", data)
+        print ("received authentication:", data) # Response of the authentication center
         s.close()
         return data
 
 
-    def requestNonce():
-        #request = b"('mat','send nonce motherfucker')"
-        request = str({'Username':self.username,'Request': 'send nonce motherfucker'}).encode('utf-8')
-        connect(request)
+   
 
     def sendMessage(self, message):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -168,17 +143,29 @@ class Node:
         self.ip_address=config.get('node','ip_address')
         self.username=config.get('node','username')
         self.server_address=config.get('registration','ip_address')
-        self.nextIP1=config.get('neigbours','IP_1')
-        self.nextIP2=config.get('neigbours','IP_2')
+        items = config.items('neigbours')
+        print(items)
+        self.nextIP = []   # list of the neighbours' IP addresses
+        i = 0
+        for neighbour in items:
+            self.nextIP.append(neighbour[1])
+            i+=1
 
         #authenticationCenterCom = Thread(target = self.runAuthenticationCenterCom)
-        nodeListener = Thread(target = self.runNodesListener())
+        
+        nodeListener = Thread(target = self.runNodesListener)
+        print('ok')
+        nodesMessage = Thread(target = self.runNodesMessage)
         #timer = Thread(target = self.runTimer)
         #authenticationCenterCom.setDaemon(True)
-        nodeListener.setDaemon(True)
+        #nodeListener.setDaemon(True)
+        #nodesMessage.setDaemon(True)
         #timer.setDaemon(True)
         #authenticationCenterCom.start()
+        
+        
         nodeListener.start()
+        nodesMessage.start()
         #timer.start()
 
 def main():
@@ -186,17 +173,11 @@ def main():
     node = Node()   
     #MESSAGE = str({'Username':node.username,'Password':node.Password}).encode('utf-8')
     #node.sendMessage(MESSAGE)
-
-##    authenticationCenterCom = Thread(target = node.runAuthenticationCenterCom())
-##    authenticationCenterCom.setDaemon(True)
-##    authenticationCenterCom.start()
-
     
     
     
 if __name__ == '__main__': main()
 
-    #print ("received data:", data)
 
 
 
