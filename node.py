@@ -81,7 +81,7 @@ class Node:
 
     
     def runAuthenticationCenterCom(self):
-        """ fonction run as a thread it's reposible for the communication with
+        """ fonction run as a thread it's responsible for the communication with
         the authentication center
         """
         
@@ -170,11 +170,9 @@ class Node:
         
         nodeListener = Thread(target = self.runNodesListener)        
         nodesMessage = Thread(target = self.runNodesMessage)
-        #timer = Thread(target = self.runTimer)
         #authenticationCenterCom.setDaemon(True)
         #nodeListener.setDaemon(True)
         #nodesMessage.setDaemon(True)
-        #timer.setDaemon(True)
         #authenticationCenterCom.start()
         
         
