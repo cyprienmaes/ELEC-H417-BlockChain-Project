@@ -112,14 +112,17 @@ class Blockchain(object):
 		PARAMETERS :
 		- last_block : The last block of the chain
 		Return :
-		- proof : The good proof
+		list of : - proof : The good proof
+				  - t1-t0 : The time to make the proof
 		"""
 		last_proof = last_block['proof']
 		last_hash = last_block['hash']
 		proof = 0
+		t0 = time.clock()
 		while self.valid_proof(last_proof, proof, last_hash) is False:
 			proof += 1
-		return proof
+		t1 = time.clock()
+		return [proof, t1-t0]
 		
 	@staticmethod
 	# The static method doesn't need an object instantiation.
@@ -173,25 +176,22 @@ new_block_chain.create_genesis_block(0)
 
 lastBlock = new_block_chain.last_block
 amount = 18
-t0 = time.clock()
-new_proof = new_block_chain.proof_of_work(lastBlock)
-t1 = time.clock()
-block1 = new_block_chain.new_block(amount, new_proof, t1-t0, lastBlock['hash'])
+proof = new_block_chain.proof_of_work(lastBlock)
+block1 = new_block_chain.new_block(amount, proof[0], proof[1], lastBlock['hash'])
 print(block1)
+
 lastBlock = new_block_chain.last_block
 amount = 24
-t0 = time.clock()
-new_proof = new_block_chain.proof_of_work(lastBlock)
-t1 = time.clock()
-block2 = new_block_chain.new_block(amount, new_proof, t1-t0, lastBlock['hash'])
-print(block2)
+proof = new_block_chain.proof_of_work(lastBlock)
+block1 = new_block_chain.new_block(amount, proof[0], proof[1], lastBlock['hash'])
+print(block1)
+
 lastBlock = new_block_chain.last_block
 amount = 24
-t0 = time.clock()
-new_proof = new_block_chain.proof_of_work(lastBlock)
-t1 = time.clock()
-block3 = new_block_chain.new_block(amount, new_proof, t1-t0, lastBlock['hash'])
-print(block3)
+proof = new_block_chain.proof_of_work(lastBlock)
+block1 = new_block_chain.new_block(amount, proof[0], proof[1], lastBlock['hash'])
+print(block1)
+
 new_block_chain.choosing_block()
 
 lastBlock = new_block_chain.last_block
