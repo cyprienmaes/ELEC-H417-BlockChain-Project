@@ -61,7 +61,7 @@ class Node:
                         receivedBlock = decriptedData['Block']
                         if receivedBlock in self.blockchain.waiting_blocks:
                             pass
-                        elif :
+                        else :
                             self.blockchain.putting_block(receivedBlock)
                             self.message = data
                             nodesMessage = Thread(target = node.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
@@ -73,10 +73,14 @@ class Node:
                             if decriptedData['Conf block'] in blockchain.waiting_blocks:
                                 if receivedConfirmation == 'block rejected':
                                     self.blockchain.waiting_blocks.clear()
+                                    self.contactedIP.clear()
                                     self.message = data
                                     nodesMessage = Thread(target = node.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                                     nodesMessage.start()
-                                self.contactedIP[addr] = receivedConfirmation
+                                elif receivedConfirmation == 'block accepted':
+                                    
+                                    
+                                    self.contactedIP[addr] = receivedConfirmation
                         except KeyError:
                             pass
                 else:
@@ -192,7 +196,7 @@ class Node:
             self.nextIP.append(neighbour[1])
             i+=1
         self.message = b''
-        blockchain = Blockchain()
+        self.blockchain = Blockchain()
         self.contactedIP = {}
 
 
@@ -240,7 +244,7 @@ def main():
                         """
                         
                         
-                        if (blockchain.chain == []):                  # ïf blockchain is empty, create genesis block
+                        if (node.blockchain.chain == []):                  # ïf blockchain is empty, create genesis block
                             #blockchain.create_genesis_block()
                             nodesMessage = Thread(target = node.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                             node.message = node.setMessage(node.blockchain.create_genesis_block(amount))
