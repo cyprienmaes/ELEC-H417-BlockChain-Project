@@ -52,15 +52,22 @@ class Node:
             socketNodes.settimeout(1)
             try :
                 conn, addr = socketNodes.accept()
-                print(addr)
+                #print(addr)
                 data = conn.recv(self.BUFFER_SIZE)
                 if data:
                     decriptedData = ast.literal_eval(data.decode('utf-8'))
                     try:
-                        #print(decriptedData['Block'])    # Check if we receive a new block
+                        """
+                        We want to know what kind of message we received
+                        Here we consider it is a new block
+                        """
+                        
                         receivedBlock = decriptedData['Block']
                         if receivedBlock in self.blockchain.waiting_blocks:
                             pass
+
+
+                        
                         else :
                             self.blockchain.putting_block(receivedBlock)
                             self.message = data
@@ -68,7 +75,14 @@ class Node:
                             nodesMessage.start()
                     except KeyError:
                         try:
-                            #print(decriptedData['pending block']) #check if it is a confirmation for a block we sent
+                            """
+                            The message is not a new block but a response to a received block
+                            If the block is rejected we drop everything and broadcast a message of rejection
+                            If it is accepted we check if it is accepted by every neighbour if yes we ad it to the chain
+                            and broadcast the info
+
+                            """
+    
                             receivedConfirmation = decriptedData['Confirmation']
                             if decriptedData['Conf block'] in blockchain.waiting_blocks:
                                 if receivedConfirmation == 'block rejected':
@@ -78,9 +92,17 @@ class Node:
                                     nodesMessage = Thread(target = node.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                                     nodesMessage.start()
                                 elif receivedConfirmation == 'block accepted':
-                                    
-                                    
                                     self.contactedIP[addr] = receivedConfirmation
+                                    if self.verifyIfAccepted():
+                                        self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
+                                        self.blockchain.waiting_blocks.clear()
+                                        self.message = data
+                                        nodesMessage = Thread(target = node.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                                        nodesMessage.start()
+                                        
+                                    else:
+                                        continue
+                                    
                         except KeyError:
                             pass
                 else:
@@ -102,7 +124,7 @@ class Node:
                     try:
                         socketNodes.connect((neighbour, 5003))
                         socketNodes.send(self.message)
-                        self.contactedIP[neigbour] = 'waiting'
+                        self.contactedIP[neighbour] = 'waiting'
                         break
                     except ConnectionRefusedError:
                         pass
@@ -111,6 +133,19 @@ class Node:
     def setMessage(self,block):
         message = str(block).encode('utf-8')
         return message
+
+    def verifyIfAccepted():
+        verified = True
+        for contact in self.nextIP:
+            if 'block accepted' == contactedIP[contact]:
+                verified = True
+            else:
+                verified = False
+                break
+        return verified
+            
+            
+        
 
     
     def runAuthenticationCenterCom(self):
@@ -229,6 +264,8 @@ def main():
             print("Do you want to make a transaction?")
             transac_status = input("")
             if transac_status =="yes":
+                #athentication = node.authenticate()
+                #if authenticate == b'ok'
                 print("How much money do you want to transfer?")
                 amount = input("")
                 if amount.isdigit():                
@@ -251,9 +288,8 @@ def main():
                             nodesMessage.start()
                         else:
 
-                            proof = proof_of_work(node.blockchain.last_block())
+                            proof, time_proof = proof_of_work(node.blockchain.last_block())
                             previous_hash = hashBlock(node.blockchain.last_block())
-                            time_proof = 1                            # We need a fonction to give it 
                             #blockchain.new_block(blockchain.last_block['hash'])
                             node.blockchain.new_block(amount, proof, time_proof, previous_hash)
                         print("Transaction Validated")   

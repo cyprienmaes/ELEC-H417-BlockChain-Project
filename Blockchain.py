@@ -108,6 +108,7 @@ class Blockchain(object):
         else :
                 return True
 
+    
     def proof_of_work(self,last_block):
         """
         Proof of work algorithm. Find a number p such the hash(p,previous_proof,
@@ -115,14 +116,17 @@ class Blockchain(object):
         PARAMETERS :
         - last_block : The last block of the chain
         Return :
-        - proof : The good proof
+        list of : - proof : The good proof
+                          - t1-t0 : The time to make the proof
         """
         last_proof = last_block['proof']
         last_hash = last_block['hash']
         proof = 0
+        t0 = time.clock()
         while self.valid_proof(last_proof, proof, last_hash) is False:
                 proof += 1
-        return proof
+        t1 = time.clock()
+        return [proof, t1-t0]
         
     @staticmethod
     # The static method doesn't need an object instantiation.
