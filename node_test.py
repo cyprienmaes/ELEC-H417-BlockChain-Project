@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+"""
+THIS IS A NODE MADE FOR TESTS IT'S NOT INTERACTIVE BUT ONLY A LISTENER. IT BEHAVES AS A
+NORMAL NODE IN THE NETWORK.
+
+
+"""
+
 import socket
 import hashlib
 import ast

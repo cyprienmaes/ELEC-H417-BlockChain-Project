@@ -44,7 +44,7 @@ class Node:
         """
         
         socketNodes = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socketNodes.bind((self.ip_address, 5002))
+        socketNodes.bind((self.ip_address, 5003))
 
         while True:
             socketNodes.listen(1)
@@ -64,14 +64,18 @@ class Node:
                         
                         receivedBlock = decriptedData['Block']
                         if receivedBlock in self.blockchain.waiting_blocks:
-                            pass
-
-
-                        
+                            self.confirmed.append[addr]
+                            if verifyComfirmed:
+                                self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
+                                self.blockchain.waiting_blocks.clear()
+                                confirmed.clear()
+                            else:
+                                pass
+ 
                         else :
                             self.blockchain.putting_block(receivedBlock)
                             self.message = data
-                            nodesMessage = Thread(target = node.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                            nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                             nodesMessage.start()
                     except KeyError:
                         try:
@@ -89,7 +93,7 @@ class Node:
                                     self.blockchain.waiting_blocks.clear()
                                     self.contactedIP.clear()
                                     self.message = data
-                                    nodesMessage = Thread(target = node.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                                    nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                                     nodesMessage.start()
                                 elif receivedConfirmation == 'block accepted':
                                     self.contactedIP[addr] = receivedConfirmation
@@ -97,7 +101,7 @@ class Node:
                                         self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
                                         self.blockchain.waiting_blocks.clear()
                                         self.message = data
-                                        nodesMessage = Thread(target = node.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                                        nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                                         nodesMessage.start()
                                         
                                     else:
@@ -138,6 +142,17 @@ class Node:
         verified = True
         for contact in self.nextIP:
             if 'block accepted' == contactedIP[contact]:
+                verified = True
+            else:
+                verified = False
+                break
+        return verified
+    
+    def verifyConfirmed():
+        verified = True
+        for addr in self.confirmed:
+            
+            if addr in self.nextIP:
                 verified = True
             else:
                 verified = False
@@ -233,6 +248,7 @@ class Node:
         self.message = b''
         self.blockchain = Blockchain()
         self.contactedIP = {}
+        self.confirmed = []
 
 
 def main():
