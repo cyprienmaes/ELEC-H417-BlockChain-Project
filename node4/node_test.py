@@ -120,7 +120,7 @@ class Node:
                                 if self.verifyIfAccepted():
                                     #print(self.blockchain.waiting_blocks)
                                     self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
-                                    #print(self.blockchain.chain)
+                                    print(self.blockchain.chain)
                                     self.blockchain.waiting_blocks.clear()
                                     self.message = self.setMessage((self.ip_address,decriptedData[1]))
                                     nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
@@ -150,7 +150,7 @@ class Node:
                     try:
                         socketNodes.connect((neighbour, 5003))
                         socketNodes.send(self.message)
-                        #print(b'sending'+self.message)
+                        #print(b'sending:' + self.message)
                         self.contactedIP[neighbour] = 'waiting'
                         break
                     except ConnectionRefusedError:
