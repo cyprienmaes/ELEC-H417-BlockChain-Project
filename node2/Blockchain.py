@@ -93,6 +93,36 @@ class Blockchain(object):
         self.chain.append(block_choice)
         self.waiting_blocks = []
         return block_choice
+
+    def compare_blocks(self):
+        
+        """
+        Choice of the transmitted block. This choice is made 
+        according to the amount of the highest transaction. If two transactions 
+        are equivalent, the block is chosen according to the smallest proof.
+        RETURN :
+        block_choice : The block transmitted
+        """
+        
+        # Saving the biggest amount
+        amount_save = 0
+        # Saving the smallest proof
+        time_proof_save = 30
+        if len(self.waiting_blocks) >= 1:
+                for block in self.waiting_blocks :
+                        if block['transaction'] > amount_save :
+                                amount_save = block['transaction']
+                                time_proof_save = block['time_proof']
+                                block_choice = block
+                        elif block['transaction'] == amount_save :
+                                if block['time_proof'] < time_proof_save :
+                                        time_proof_save = block['time_proof']
+                                        block_choice = block
+        self.waiting_blocks = [block_choice]
+        return block_choice
+
+
+
  
     def valid_block(self, block) :
         """
