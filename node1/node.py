@@ -47,7 +47,7 @@ class Node:
 
         while True:
             socketNodes.listen(1)
-            socketNodes.settimeout(1)
+            #socketNodes.settimeout(1)
             try :
                 conn, addr1 = socketNodes.accept()
                 #print(addr)
@@ -169,7 +169,7 @@ class Node:
         """
         
         if self.blockchain.waiting_blocks == []:
-            #self.confirmed.clear()
+            self.confirmed.clear()
             self.neighboursOk.clear()
             self.confirmed.append(addr)
             self.blockchain.putting_block(receivedBlock)
@@ -206,11 +206,14 @@ class Node:
             else:
                 self.blockchain.putting_block(receivedBlock)
                 self.blockchain.waiting_blocks = [self.blockchain.compare_blocks()]
-                self.message = self.setMessage((self.ip_address,{'Block': self.blockchain.waiting_blocks[0]}))
-                nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-                nodesMessage.setDaemon(True)
-                nodesMessage.start()
-                nodesMessage.join()
+                if self.blockchain.waiting_blocks[0] == receivedBlock:
+                    self.confirmed.clear()
+                    self.confirmed.append(addr)
+                    self.message = self.setMessage((self.ip_address,{'Block': self.blockchain.waiting_blocks[0]}))
+                    nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                    nodesMessage.setDaemon(True)
+                    nodesMessage.start()
+                    nodesMessage.join()
                         
                     
                            
