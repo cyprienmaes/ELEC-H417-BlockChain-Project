@@ -230,7 +230,7 @@ class Node:
             else:
                 self.blockchain.putting_block(receivedBlock)
                 self.blockchain.waiting_blocks = [self.blockchain.compare_blocks()]
-                self.message = self.setMessage((self.ip_address,{'Block': self.blockchain.compare_blocks()}))
+                self.message = self.setMessage((self.ip_address,{'Block': self.blockchain.waiting_blocks[0]}))
                 nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                 nodesMessage.setDaemon(True)
                 nodesMessage.start()

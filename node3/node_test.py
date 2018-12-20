@@ -62,10 +62,12 @@ class Node:
                         """
                         
                         receivedBlock = decriptedData[1]['Block']
+                        #print(receivedBlock)
                         if self.blockchain.chain == []:
                             self.arrivingBlock(decriptedData[1], addr, receivedBlock)                 
 
                         else:
+                            print('lalala')
                             if receivedBlock['previous_hash'] == self.blockchain.last_block['hash']:
                                self.arrivingBlock(decriptedData[1], addr, receivedBlock)
                             else:
@@ -94,14 +96,16 @@ class Node:
                                 nodesMessage.setDaemon(True)
                                 nodesMessage.start()
                             elif receivedConfirmation == 'All my neighbours ok':
+                                print('r u ok?')
                                 if addr in self.neighboursOk:
                                     pass
                                 else:
                                     self.neighboursOk.append(addr)
                                     if self.verifyConfirmed(self.neighboursOk):
+                                        #print(self.blockchain.waiting_blocks)
                                         if self.blockchain.waiting_blocks != []:
                                             self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
-                                            #print(self.blockchain.chain)
+                                            print(self.blockchain.chain)
                                             self.blockchain.waiting_blocks.clear()
                                             self.neighboursOk.clear()
                                             self.confirmed.clear()
@@ -114,8 +118,9 @@ class Node:
                             elif receivedConfirmation == 'block accepted':
                                 self.contactedIP[addr] = receivedConfirmation
                                 if self.verifyIfAccepted():
+                                    #print(self.blockchain.waiting_blocks)
                                     self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
-                                    #print(self.blockchain.chain)
+                                    print(self.blockchain.chain)
                                     self.blockchain.waiting_blocks.clear()
                                     self.message = self.setMessage((self.ip_address,decriptedData[1]))
                                     nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
@@ -145,7 +150,8 @@ class Node:
                     try:
                         socketNodes.connect((neighbour, 5003))
                         socketNodes.send(self.message)
-                        #self.contactedIP[neighbour] = 'waiting'
+                        print(self.message)
+                        self.contactedIP[neighbour] = 'waiting'
                         break
                     except ConnectionRefusedError:
                         pass
@@ -156,7 +162,32 @@ class Node:
     def setMessage(self,block):
         message = str(block).encode('utf-8')
         return message
-
+##
+##    def arrivingBlock(self,data, addr, receivedBlock):
+##        """
+##        Looks if the received block is in the waiting list. If yes we
+##        check if the address is already recorded. If no it is added to the waiting list
+##        and broadcasted.
+##        """
+##        
+##        if self.blockchain.waiting_blocks == []:
+##            self.blockchain.putting_block(receivedBlock)
+##            self.message = data
+##            nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+##            nodesMessage.setDaemon(True)
+##            nodesMessage.start()
+##        else:
+##            if receivedBlock in self.blockchain.waiting_blocks:
+##                if addr not in self.confirmed:
+##                    self.confirmed.append(addr)
+##                    if self.verifyConfirmed(self.confirmed):
+##                        self.message = setMessage({'Conf block': 'All my neighbours ok'})
+##                        nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+##                        nodesMessage.setDaemon(True)
+##                        self.blockchain.chain.append()
+##                        nodesMessage.start()
+##                        self.confirmed.clear()
+                        
     def arrivingBlock(self,data, addr, receivedBlock):
         """
         Looks if the received block is in the waiting list. If yes we
@@ -167,20 +198,22 @@ class Node:
         if self.blockchain.waiting_blocks == []:
             self.confirmed.append(addr)
             self.blockchain.putting_block(receivedBlock)
+
             self.message = self.setMessage((self.ip_address,data))
             nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
             nodesMessage.setDaemon(True)
             nodesMessage.start()
-
             
             if self.verifyConfirmed(self.confirmed):
+                #print('conf')
+                print(receivedBlock)
                 self.message = self.setMessage((self.ip_address,{'Confirmation': 'All my neighbours ok'}))
                 nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                 nodesMessage.setDaemon(True)
                 nodesMessage.start()
                 self.confirmed.clear()
 ##            else: 
-##                self.message = self.setMessage((self.ip_address, data))
+##                self.message = self.setMessage((self.ip_address,data))
 ##                nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
 ##                nodesMessage.setDaemon(True)
 ##                nodesMessage.start()
@@ -201,8 +234,6 @@ class Node:
                 nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                 nodesMessage.setDaemon(True)
                 nodesMessage.start()
-                        
-                    
                            
         
 
@@ -297,67 +328,7 @@ class Node:
         s.send(message)
         s.close()
 
-    def runInterface(self):
-        tran_op = 0
-
-        while True:
-            while (tran_op==0):
-                print("Do you want to make a transaction?")
-                transac_status = input("")
-                if transac_status =="yes":
-                    #athentication = node.authenticate()
-                    #if authenticate == b'ok'
-                    print("How much money do you want to transfer?")
-                    amount = input("")
-                    if amount.isdigit():                
-                        if amount == 0:
-                            tran_op = 1
-                            print("Transaction Impossible - Amount Null")
-                            print(self.blockchain.last_block)
-                            
-                        else:                                       
-                            
-                            """
-                            Here we create a new block that we broadcoast.
-                            """
-                            
-                            
-                            if (self.blockchain.chain == []):                  # ïf blockchain is empty, create genesis block
-                                #blockchain.create_genesis_block()
-                                nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-                                self.message = self.setMessage((self.ip_address,{'Block':self.blockchain.create_genesis_block(amount)}))
-                                nodesMessage.setDaemon(True)
-                                nodesMessage.start()
-                            else:
-
-                                #proof = node.blockchain.proof_of_work(node.blockchain.last_block())[0]
-                                #time_proof = node.blockchain.proof_of_work(node.blockchain.last_block())[1]
-                                #print(self.blockchain.chain)
-                                proof, time_proof = self.blockchain.proof_of_work()
-                                previous_hash = self.blockchain.last_block['hash']
-                                #blockchain.new_block(blockchain.last_block['hash'])
-                                newBlock = self.blockchain.new_block(amount, proof, time_proof, previous_hash)
-                                nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-                                self.message = self.setMessage((self.ip_address,{'Block':newBlock}))
-                                nodesMessage.setDaemon(True)
-                                nodesMessage.start()
-                            print("Transaction Validated")   
-    ##                        timer.setTime(0)
-    ##                        while (timer.getTime() < 30):
-    ##                            if False:                                 # insert block incoming condition here
-    ##                                blockchain.chain[-1] = []             # deletes created block if it recieves another block
-    ##                        """append block"""
-                        
-                    else:
-                        tran_op = 1;
-                        print("Transaction Impossible - Wrong Input")
-                elif transac_status =="no":
-                    print("Ending Transaction")
-                    tran_op = 1
-                else:
-                    print("Transaction Impossible - Wrong Input")
-                    tran_op = 1
-            tran_op = 0
+    
 
 
     def __init__(self):
@@ -406,12 +377,6 @@ def main():
     #print('ok')
     #timer.start()
     
-
-
-    
-            
-    interface = Thread(target = node.runInterface)
-    interface.start()
     
     
 if __name__ == '__main__': main()
