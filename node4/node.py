@@ -411,11 +411,7 @@ def main():
     #nodesMessage.start()
     #print('ok')
     #timer.start()
-    
-
-
-    
-            
+          
     interface = Thread(target = node.runInterface)
     interface.start()
     

@@ -94,6 +94,7 @@ class Blockchain(object):
         self.waiting_blocks = []
         return block_choice
 
+
     def compare_blocks(self):
         
         """
@@ -121,8 +122,7 @@ class Blockchain(object):
         self.waiting_blocks = [block_choice]
         return block_choice
 
-
-
+    
  
     def valid_block(self, block) :
         """
@@ -149,7 +149,7 @@ class Blockchain(object):
         list of : - proof : The good proof
                           - t1-t0 : The time to make the proof
         """
-        last_block = self.last_block()
+        last_block = self.last_block
         last_proof = last_block['proof']
         last_hash = last_block['hash']
         proof = 0
