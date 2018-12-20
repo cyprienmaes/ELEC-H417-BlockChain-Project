@@ -46,7 +46,7 @@ class Node:
         socketNodes.bind((self.ip_address, 5003))
 
         while True:
-            socketNodes.listen(1)
+            socketNodes.listen(5)
             #socketNodes.settimeout(1)
             try :
                 conn, addr1 = socketNodes.accept()
