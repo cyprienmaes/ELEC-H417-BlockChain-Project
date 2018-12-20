@@ -170,10 +170,10 @@ class Node:
             self.confirmed.append(addr)
             self.blockchain.putting_block(receivedBlock)
             self.message = self.setMessage((self.ip_address,data))
-            nodesMessage1 = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-            nodesMessage1.setDaemon(True)
-            nodesMessage1.start()
-            nodesMessage1.join()
+            nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+            nodesMessage.setDaemon(True)
+            nodesMessage.start()
+            nodesMessage.join()
 
             
             if self.verifyConfirmed(self.confirmed):
