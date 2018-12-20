@@ -83,51 +83,52 @@ class Node:
                             If it is accepted we check if it is accepted by every neighbour if yes we ad it to the chain
                             and broadcast the info
                             """
-    
-                            receivedConfirmation = decriptedData[1]['Confirmation']
-                        
-                            if receivedConfirmation == 'block rejected':
-                                self.blockchain.waiting_blocks.clear()
-                                self.contactedIP.clear()
-                                self.message = self.setMessage((self.ip_address,decriptedData[1]))
-                                nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-                                nodesMessage.setDaemon(True)
-                                nodesMessage.start()
-                            elif receivedConfirmation == 'All my neighbours ok':
-                                if addr in self.neighboursOk:
-                                    pass
-                                else:
-                                    self.neighboursOk.append(addr)
-                                    if self.verifyConfirmed(self.neighboursOk):
-                                        if self.blockchain.waiting_blocks != []:
-                                            self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
-                                            #print(self.blockchain.chain)
-                                            self.blockchain.waiting_blocks.clear()
-                                            self.neighboursOk.clear()
-                                            self.confirmed.clear()
-                                            #self.message = self.setMessage((self.ip_address,{'Confirmation': 'All my neighbours ok'}))
-                                            #nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-                                            #nodesMessage.setDaemon(True)
-                                            #nodesMessage.start()
-                                
+                            if self.blockchain.waiting_blocks != []:
+                                receivedConfirmation = decriptedData[1]['Confirmation']
                             
-                            elif receivedConfirmation == 'block accepted':
-                                self.contactedIP[addr] = receivedConfirmation
-                                if self.verifyIfAccepted():
-                                    self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
-                                    #print(self.blockchain.chain)
+                                if receivedConfirmation == 'block rejected':
                                     self.blockchain.waiting_blocks.clear()
+                                    self.contactedIP.clear()
                                     self.message = self.setMessage((self.ip_address,decriptedData[1]))
                                     nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                                     nodesMessage.setDaemon(True)
                                     nodesMessage.start()
+                                elif receivedConfirmation == 'All my neighbours ok':
+                                    if addr in self.neighboursOk:
+                                        pass
+                                    else:
+                                        self.neighboursOk.append(addr)
+                                        if self.verifyConfirmed(self.neighboursOk):
+                                            if self.blockchain.waiting_blocks != []:
+                                                self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
+                                                #print(self.blockchain.chain)
+                                                self.blockchain.waiting_blocks.clear()
+                                                self.neighboursOk.clear()
+                                                self.confirmed.clear()
+                                                #self.message = self.setMessage((self.ip_address,{'Confirmation': 'All my neighbours ok'}))
+                                                #nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                                                #nodesMessage.setDaemon(True)
+                                                #nodesMessage.start()
                                     
-                                else:
-                                    continue
                                 
+                                elif receivedConfirmation == 'block accepted':
+                                    self.contactedIP[addr] = receivedConfirmation
+                                    if self.verifyIfAccepted():
+                                        self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
+                                        #print(self.blockchain.chain)
+                                        self.blockchain.waiting_blocks.clear()
+                                        self.message = self.setMessage((self.ip_address,decriptedData[1]))
+                                        nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                                        nodesMessage.setDaemon(True)
+                                        nodesMessage.start()
+                                        
+                                    else:
+                                        continue
                                     
+                            else:
+                                continue
                         except KeyError:
-                            pass
+                            continue
                 else:
                     continue
             except socket.timeout:
@@ -147,8 +148,11 @@ class Node:
                         socketNodes.send(self.message)
                         #self.contactedIP[neighbour] = 'waiting'
                         break
+                    except TimeoutError:
+                        pass
                     except ConnectionRefusedError:
                         pass
+                socketNodes.close()
             break
 
     
@@ -170,10 +174,10 @@ class Node:
             self.confirmed.append(addr)
             self.blockchain.putting_block(receivedBlock)
             self.message = self.setMessage((self.ip_address,data))
-            nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-            nodesMessage.setDaemon(True)
-            nodesMessage.start()
-            nodesMessage.join()
+            nodesMessage1 = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+            nodesMessage1.setDaemon(True)
+            nodesMessage1.start()
+            nodesMessage1.join()
 
             
             if self.verifyConfirmed(self.confirmed):
