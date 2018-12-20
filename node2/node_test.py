@@ -55,7 +55,7 @@ class Node:
                 if data:
                     decriptedData = ast.literal_eval(data.decode('utf-8'))
                     addr = decriptedData[0]
-                    print(decriptedData[1])
+                    #print(decriptedData[1])
                     try:
                         """
                         We want to know what kind of message we received
@@ -167,31 +167,7 @@ class Node:
     def setMessage(self,block):
         message = str(block).encode('utf-8')
         return message
-##
-##    def arrivingBlock(self,data, addr, receivedBlock):
-##        """
-##        Looks if the received block is in the waiting list. If yes we
-##        check if the address is already recorded. If no it is added to the waiting list
-##        and broadcasted.
-##        """
-##        
-##        if self.blockchain.waiting_blocks == []:
-##            self.blockchain.putting_block(receivedBlock)
-##            self.message = data
-##            nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-##            nodesMessage.setDaemon(True)
-##            nodesMessage.start()
-##        else:
-##            if receivedBlock in self.blockchain.waiting_blocks:
-##                if addr not in self.confirmed:
-##                    self.confirmed.append(addr)
-##                    if self.verifyConfirmed(self.confirmed):
-##                        self.message = setMessage({'Conf block': 'All my neighbours ok'})
-##                        nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-##                        nodesMessage.setDaemon(True)
-##                        self.blockchain.chain.append()
-##                        nodesMessage.start()
-##                        self.confirmed.clear()
+
                         
     def arrivingBlock(self,data, addr, receivedBlock):
         """
@@ -213,19 +189,14 @@ class Node:
             nodesMessage.join()
             
             if self.verifyConfirmed(self.confirmed):
-                #print('conf')
-                #print(receivedBlock)
+                
                 self.message = self.setMessage((self.ip_address,{'Confirmation': 'All my neighbours ok'}))
                 nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
                 nodesMessage.setDaemon(True)
                 nodesMessage.start()
                 nodesMessage.join()
                 self.confirmed.clear()
-##            else: 
-##                self.message = self.setMessage((self.ip_address,data))
-##                nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-##                nodesMessage.setDaemon(True)
-##                nodesMessage.start()
+
         else:
             if receivedBlock in self.blockchain.waiting_blocks:
                 if addr not in self.confirmed:
