@@ -281,7 +281,7 @@ class Node:
 
         while True:
             while (tran_op==0):
-                print("Do you want to make a transaction?")
+                print("Do you want to make a transaction? (yes to confirm)")
                 transac_status = input("")
                 if transac_status =="yes":
                     authentication = self.authenticate()

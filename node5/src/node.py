@@ -281,7 +281,7 @@ class Node:
 
         while True:
             while (tran_op==0):
-                print("Do you want to make a transaction?")
+                print("Do you want to make a transaction? (yes to confirm)")
                 transac_status = input("")
                 if transac_status =="yes":
                     authentication = self.authenticate()
@@ -357,7 +357,7 @@ class Node:
 
 
 def main():
-
+    print("User 1")
     node = Node()
     password = str(node.password).encode('utf-8')
     MESSAGE = str({'Username':node.username,'Password':password}).encode('utf-8')
