@@ -326,6 +326,7 @@ class Node:
         self.ip_address=config.get('node','ip_address')
         self.username=config.get('node','username')
         self.server_address=config.get('registration','ip_address')
+        self.password=config.get('registration','Password')
         items = config.items('neigbours')
         self.nextIP = []   # list of the neighbours' IP addresses
         i = 0

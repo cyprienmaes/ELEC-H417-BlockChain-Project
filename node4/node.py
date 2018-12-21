@@ -101,15 +101,21 @@ class Node:
                                         if self.verifyConfirmed(self.neighboursOk):
                                             if self.blockchain.waiting_blocks != []:
                                                 self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
+                                                #print(self.blockchain.chain)
                                                 self.blockchain.waiting_blocks.clear()
                                                 self.neighboursOk.clear()
                                                 self.confirmed.clear()
+                                                #self.message = self.setMessage((self.ip_address,{'Confirmation': 'All my neighbours ok'}))
+                                                #nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                                                #nodesMessage.setDaemon(True)
+                                                #nodesMessage.start()
                                     
                                 
                                 elif receivedConfirmation == 'block accepted':
                                     self.contactedIP[addr] = receivedConfirmation
                                     if self.verifyIfAccepted():
                                         self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
+                                        #print(self.blockchain.chain)
                                         self.blockchain.waiting_blocks.clear()
                                         self.message = self.setMessage((self.ip_address,decriptedData[1]))
                                         nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
@@ -140,6 +146,7 @@ class Node:
                     try:
                         socketNodes.connect((neighbour, 5003))
                         socketNodes.send(self.message)
+                        #self.contactedIP[neighbour] = 'waiting'
                         break
                     except TimeoutError:
                         pass
@@ -180,7 +187,11 @@ class Node:
                 nodesMessage.start()
                 nodesMessage.join()
                 self.confirmed.clear()
-
+##            else: 
+##                self.message = self.setMessage((self.ip_address, data))
+##                nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+##                nodesMessage.setDaemon(True)
+##                nodesMessage.start()
         else:
             if receivedBlock in self.blockchain.waiting_blocks:
                 if addr not in self.confirmed:
@@ -372,6 +383,7 @@ class Node:
         self.ip_address=config.get('node','ip_address')
         self.username=config.get('node','username')
         self.server_address=config.get('registration','ip_address')
+        self.password=config.get('registration','Password')
         items = config.items('neigbours')
         self.nextIP = []   # list of the neighbours' IP addresses
         i = 0
