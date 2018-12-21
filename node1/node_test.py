@@ -17,10 +17,8 @@ except ImportError:
 class Node:
 
     #--------GLOBAL VARIABLES----------------
-
-    #TCP_IP = '127.0.0.1'  # my IP 164.15.244.54
-    TCP_PORT = 5005        # port number used for the TCP authentication center connection
-    TCP_PORT_BROAD = 5004  # testing for broadcoast 
+    
+    TCP_PORT = 5003
     BUFFER_SIZE = 1024     # size of the receiveng buffer -- we can adapt it to the lenght
                            # of our messages witch will speed up the transition
     Password = b'Dricot'   # users password
@@ -47,15 +45,12 @@ class Node:
 
         while True:
             socketNodes.listen(5)
-            #socketNodes.settimeout(1)
             try :
                 conn, addr1 = socketNodes.accept()
-                #print(addr)
                 data = conn.recv(self.BUFFER_SIZE)
                 if data:
                     decriptedData = ast.literal_eval(data.decode('utf-8'))
                     addr = decriptedData[0]
-                    #print(decriptedData[1])
                     try:
                         """
                         We want to know what kind of message we received
@@ -63,12 +58,10 @@ class Node:
                         """
                         
                         receivedBlock = decriptedData[1]['Block']
-                        #print(receivedBlock)
                         if self.blockchain.chain == []:
                             self.arrivingBlock(decriptedData[1], addr, receivedBlock)                 
 
                         else:
-                            #print('lalala')
                             if receivedBlock['previous_hash'] == self.blockchain.last_block['hash']:
                                self.arrivingBlock(decriptedData[1], addr, receivedBlock)
                             else:
@@ -97,40 +90,17 @@ class Node:
                                     nodesMessage.setDaemon(True)
                                     nodesMessage.start()
                                 elif receivedConfirmation == 'All my neighbours ok':
-                                    #print('r u ok?')
                                     if addr in self.neighboursOk:
                                         pass
                                     else:
                                         self.neighboursOk.append(addr)
                                         if self.verifyConfirmed(self.neighboursOk):
-                                            #print(self.blockchain.waiting_blocks)
                                             if self.blockchain.waiting_blocks != []:
                                                 self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
                                                 print(self.blockchain.chain)
                                                 self.blockchain.waiting_blocks.clear()
                                                 self.neighboursOk.clear()
-                                                self.confirmed.clear()
-                                                #self.message = self.setMessage((self.ip_address,{'Confirmation': 'All my neighbours ok'}))
-                                                #nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-                                                #nodesMessage.setDaemon(True)
-                                                #nodesMessage.start()
-                                    
-                                
-                                elif receivedConfirmation == 'block accepted':
-                                    self.contactedIP[addr] = receivedConfirmation
-                                    if self.verifyIfAccepted():
-                                        #print(self.blockchain.waiting_blocks)
-                                        self.blockchain.chain.append(self.blockchain.waiting_blocks[0])
-                                        #print(self.blockchain.chain)
-                                        self.blockchain.waiting_blocks.clear()
-                                        self.message = self.setMessage((self.ip_address,decriptedData[1]))
-                                        nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
-                                        nodesMessage.setDaemon(True)
-                                        nodesMessage.start()
-                                        
-                                    else:
-                                        continue
-                                    
+                                                self.confirmed.clear()                 
                             else:
                                 continue
                         except KeyError:
@@ -152,8 +122,6 @@ class Node:
                     try:
                         socketNodes.connect((neighbour, 5003))
                         socketNodes.send(self.message)
-                        #print(b'sending'+self.message)
-                        #self.contactedIP[neighbour] = 'waiting'
                         break
                     except TimeoutError:
                         pass
@@ -183,7 +151,7 @@ class Node:
             self.blockchain.putting_block(receivedBlock)
 
             self.message = self.setMessage((self.ip_address,data))
-            nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+            nodesMessage = Thread(target = self.runNodesMessage) 
             nodesMessage.setDaemon(True)
             nodesMessage.start()
             nodesMessage.join()
@@ -191,7 +159,7 @@ class Node:
             if self.verifyConfirmed(self.confirmed):
                 
                 self.message = self.setMessage((self.ip_address,{'Confirmation': 'All my neighbours ok'}))
-                nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                nodesMessage = Thread(target = self.runNodesMessage) 
                 nodesMessage.setDaemon(True)
                 nodesMessage.start()
                 nodesMessage.join()
@@ -203,7 +171,7 @@ class Node:
                     self.confirmed.append(addr)
                     if self.verifyConfirmed(self.confirmed):
                         self.message = self.setMessage((self.ip_address,{'Confirmation': 'All my neighbours ok'}))
-                        nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                        nodesMessage = Thread(target = self.runNodesMessage) 
                         nodesMessage.setDaemon(True)
                         nodesMessage.start()
                         nodesMessage.join()
@@ -215,7 +183,7 @@ class Node:
                     self.confirmed.clear()
                     self.confirmed.append(addr)
                     self.message = self.setMessage((self.ip_address,{'Block': self.blockchain.waiting_blocks[0]}))
-                    nodesMessage = Thread(target = self.runNodesMessage) #Problem. We kill the last thread even if it didn't accomplished the task
+                    nodesMessage = Thread(target = self.runNodesMessage) 
                     nodesMessage.setDaemon(True)
                     nodesMessage.start()
                     nodesMessage.join()
@@ -245,73 +213,19 @@ class Node:
                 break
         return verified
             
-            
-        
-
-    
-    def runAuthenticationCenterCom(self):
-        """ fonction run as a thread it's responsible for the communication with
-        the authentication center
-        """
-        
-        while True:
-            answer = input("Write 't' for transaction or 'l' to logout")
-            if answer == 't':
-                authen = self.authenticate()
-                if authen == b'ok':
-                    blockchain = Blockchain()
-                    value = input("Write the value of the transaction: ")
-                    blockchain.new_transaction(value)
-            elif answer == 'l':
-                break
-            else:
-                print('Wrong command')
-                pass
-
-    def usersAction(answer):
-        if answer == 't':
-            authen = self.authenticate()
-            if authen == b'ok':
-                blockchain = Blockchain()
-                value = input("Write the value of the transaction: ")
-                blockchain.new_transaction(value)
-##        elif answer == 'l':
-##            
-##        else:
-##            print('Wrong command')
-##            pass
-
-
-    def authenticate(self):
-        """
-        Fonction which authenticates the user at the authentication center
-        """
-
-        
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.server_address, self.TCP_PORT))
-        message = str({'Username':self.username,'Request': 'send nonce motherfucker'}).encode('utf-8') # User's request of nonce
-        s.send(message)
-        data = s.recv(self.BUFFER_SIZE)
-        hashedMessage = hashlib.sha256()
-        hashedMessage.update(data)
-        hashedMessage.update(self.Password)  # The received nonce and the password are concatenated and hashed
-        myHash = hashedMessage.digest()  #or hexdigest for a more condensed form
-        s.send(myHash)
-        data = s.recv(self.BUFFER_SIZE)
-        print ("received authentication:", data) # Response of the authentication center
-        s.close()
-        return data
-
-
-   
 
     def sendMessage(self, message):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(self.server_address, self.TCP_PORT)
-        s.connect((self.server_address, self.TCP_PORT))
-        s.send(message)
-        s.close()
+        while True:
+            try:
+                s.connect((self.server_address, self.TCP_PORT))
+                s.send(message)
+                s.close()
+                break
+            except TimeoutError:
+                pass
+            except ConnectionRefusedError:
+                pass
 
     
 
@@ -342,25 +256,14 @@ class Node:
 def main():
 
     node = Node()   
-    #MESSAGE = str({'Username':node.username,'Password':node.Password}).encode('utf-8')
-    #node.sendMessage(MESSAGE)
-
-    #blockchain = Blockchain()
-
-    #authenticationCenterCom = Thread(target = self.runAuthenticationCenterCom)
+    MESSAGE = str({'Username':node.username,'Password':node.Password}).encode('utf-8')
+    node.sendMessage(MESSAGE)
     
     nodeListener = Thread(target = node.runNodesListener)        
-    #nodesMessage = Thread(target = node.runNodesMessage)
-    #authenticationCenterCom.setDaemon(True)
-    #nodeListener.setDaemon(True)
-    #nodesMessage.setDaemon(True)
-    #authenticationCenterCom.start()
     
     
     nodeListener.start()
-    #nodesMessage.start()
-    #print('ok')
-    #timer.start()
+    
     
     
     
