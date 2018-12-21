@@ -240,6 +240,7 @@ class Node:
         self.ip_address=config.get('node','ip_address')
         self.username=config.get('node','username')
         self.server_address=config.get('registration','ip_address')
+        self.password=config.get('registration','Password')
         items = config.items('neigbours')
         self.nextIP = []   # list of the neighbours' IP addresses
         i = 0
@@ -256,7 +257,7 @@ class Node:
 def main():
 
     node = Node()   
-    MESSAGE = str({'Username':node.username,'Password':node.Password}).encode('utf-8')
+    MESSAGE = str({'Username':node.username,'Password':node.password}).encode('utf-8')
     node.sendMessage(MESSAGE)
     
     nodeListener = Thread(target = node.runNodesListener)        

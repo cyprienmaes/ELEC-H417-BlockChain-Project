@@ -21,7 +21,6 @@ class Node:
     TCP_PORT = 5003
     BUFFER_SIZE = 1024     # size of the receiveng buffer -- we can adapt it to the lenght
                            # of our messages witch will speed up the transition
-    Password = b'Dricot'   # users password
     sec = 0                # counter but I think it's gonna be useless
     data = ''
 
@@ -245,7 +244,8 @@ class Node:
                 data = s.recv(self.BUFFER_SIZE)
                 hashedMessage = hashlib.sha256()
                 hashedMessage.update(data)
-                hashedMessage.update(self.Password)  # The received nonce and the password are concatenated and hashed
+                password = str(self.password).encode('utf-8')
+                hashedMessage.update(password)  # The received nonce and the password are concatenated and hashed
                 myHash = hashedMessage.digest()  #or hexdigest for a more condensed form
                 s.send(myHash)
                 data = s.recv(self.BUFFER_SIZE)  # Response of the authentication center
@@ -342,6 +342,7 @@ class Node:
         self.ip_address=config.get('node','ip_address')
         self.username=config.get('node','username')
         self.server_address=config.get('registration','ip_address')
+        self.password=config.get('registration','Password')
         items = config.items('neigbours')
         self.nextIP = []   # list of the neighbours' IP addresses
         i = 0
@@ -357,8 +358,9 @@ class Node:
 
 def main():
 
-    node = Node()   
-    MESSAGE = str({'Username':node.username,'Password':node.Password}).encode('utf-8')
+    node = Node()
+    password = str(node.password).encode('utf-8')
+    MESSAGE = str({'Username':node.username,'Password':password}).encode('utf-8')
     node.sendMessage(MESSAGE)
     
     nodeListener = Thread(target = node.runNodesListener)        
